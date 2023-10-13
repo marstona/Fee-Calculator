@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  php:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./:/var/www/symfony:cached
+#      - symfony_var:/var/www/symfony/var
+#      - symfony_vendor:/var/www/symfony/vendor
+#
+#volumes:
+#  symfony_var:
+#  symfony_vendor:
