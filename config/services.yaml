@@ -1,8 +1,46 @@
 parameters:
 
 services:
-    _defaults:
-        autowire: true      # Automatically injects dependencies in your services.
-        autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
-    PragmaGoTech\:
-        resource: '../src/'
+  _defaults:
+    autowire: false
+    autoconfigure: true
+
+  #    PragmaGoTech\:
+  #        resource: '../src/'
+
+  calculate_command:
+    class: PragmaGoTech\Interview\Infrastructure\Console\CalculateCommand
+    arguments:
+      - '@pln_money_factory'
+      - '@rounded_fixed_calculator'
+
+  pln_money_factory:
+    class: PragmaGoTech\Interview\Application\Factory\PLNMoneyFactory
+
+  rounded_fixed_calculator:
+    class: PragmaGoTech\Interview\Application\Service\Calculator\RoundedFixedFeeCalculator
+    arguments:
+      - '@fixed_fee_calculator'
+      - '@round_up_to_5pln'
+
+  fixed_fee_calculator:
+    class: PragmaGoTech\Interview\Application\Service\Calculator\FixedFeeCalculator
+    arguments:
+      - '@fixe_breakpoint_repo'
+      - '@linear_interpolation'
+
+  round_up_to_5pln:
+    class: PragmaGoTech\Interview\Domain\Service\Round\RoundUpMultipleOf5PLN
+
+  fixe_breakpoint_repo:
+    class: PragmaGoTech\Interview\Application\Repository\FixedBreakpointRepository
+    arguments:
+      - '@array_breakpoint_storage'
+
+  array_breakpoint_storage:
+    class: PragmaGoTech\Interview\Infrastructure\Service\Storage\ArrayBreakpointsStorage
+    arguments:
+      - '@pln_money_factory'
+
+  linear_interpolation:
+    class: PragmaGoTech\Interview\Domain\Service\Interpolation\LinearInterpolation

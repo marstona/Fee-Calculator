@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace PragmaGoTech\Interview\Infrastructure\Service\Storage;
 
+use PragmaGoTech\Interview\Application\Factory\PLNMoneyFactory;
+use PragmaGoTech\Interview\Domain\Exception\Money\AmountPrecisionException;
 use PragmaGoTech\Interview\Domain\Exception\Storage\NoDataException;
 use PragmaGoTech\Interview\Domain\Factory\MoneyFactory;
 use PragmaGoTech\Interview\Domain\Service\Storage\BreakpointsStorage;
@@ -60,7 +62,7 @@ class ArrayBreakpointsStorage implements BreakpointsStorage
     ];
 
     /**
-     * @param MoneyFactory $moneyFactory
+     * @param PLNMoneyFactory $moneyFactory
      */
     public function __construct(
         private readonly MoneyFactory $moneyFactory
@@ -68,11 +70,14 @@ class ArrayBreakpointsStorage implements BreakpointsStorage
     }
 
     /**
+     * @param  LoanTerm                 $term
+     * @return Breakpoint[]
      * @throws NoDataException
+     * @throws AmountPrecisionException
      */
     public function getByTerm(LoanTerm $term): array
     {
-        $termValue = $term->toInt();
+        $termValue = $term->toMonths();
 
         if (! array_key_exists($termValue, self::FEE_STRUCTURE_PLN)) {
             throw new NoDataException('No breakpoints in storage.');
@@ -84,6 +89,10 @@ class ArrayBreakpointsStorage implements BreakpointsStorage
             $fee = $this->moneyFactory->createMoney($feePln);
 
             $breakpoints[] = new Breakpoint($amount, $fee);
+        }
+
+        if (count($breakpoints) < 1) {
+            throw new NoDataException('No breakpoints in storage.');
         }
 
         return $breakpoints;

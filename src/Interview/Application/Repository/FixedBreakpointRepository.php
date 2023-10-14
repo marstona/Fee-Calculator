@@ -11,7 +11,7 @@ use PragmaGoTech\Interview\Domain\Service\Storage\BreakpointsStorage;
 use PragmaGoTech\Interview\Domain\ValueObject\Breakpoint;
 use PragmaGoTech\Interview\Domain\ValueObject\LoanTerm;
 
-readonly class FixedBreakpointRepository implements BreakpointRepository
+final readonly class FixedBreakpointRepository implements BreakpointRepository
 {
     /**
      * @param BreakpointsStorage $storage
@@ -30,6 +30,26 @@ readonly class FixedBreakpointRepository implements BreakpointRepository
     public function findBreakpoints(LoanTerm $term, Money $amount): array
     {
         $breakpoints = $this->storage->getByTerm($term);
+        $breakpointsPair = $this->findBreakpointPair($breakpoints, $amount);
+
+        if (! isset($breakpointsPair[0], $breakpointsPair[1])) {
+            throw new NoResultException('No breakpoints were found.');
+        }
+
+        return $breakpointsPair;
+    }
+
+    /**
+     * @param  Breakpoint[]        $breakpoints
+     * @param  Money               $amount
+     * @return (Breakpoint|null)[]
+     */
+    private function findBreakpointPair(array $breakpoints, Money $amount): array
+    {
+        if (! $this->isAmountInRange($amount, $breakpoints)) {
+            return [];
+        }
+
         $lowerBreakpoint = null;
         $upperBreakpoint = null;
 
@@ -42,10 +62,26 @@ readonly class FixedBreakpointRepository implements BreakpointRepository
             }
         }
 
-        if ($lowerBreakpoint === null || $upperBreakpoint === null) {
-            throw new NoResultException('No breakpoints were found.');
+        if ($upperBreakpoint === null) {
+            $elementsCount = count($breakpoints);
+            $lowerBreakpoint = $breakpoints[$elementsCount - 2];
+            $upperBreakpoint = $breakpoints[$elementsCount - 1];
         }
 
         return [$lowerBreakpoint, $upperBreakpoint];
+    }
+
+    /**
+     * @param  Money        $amount
+     * @param  Breakpoint[] $breakpoints
+     * @return bool
+     */
+    private function isAmountInRange(Money $amount, array $breakpoints): bool
+    {
+        $firstBreakpointAmount = current($breakpoints)->getAmount();
+        $lastBreakpointAmount = end($breakpoints)->getAmount();
+
+        return $amount->greaterThanOrEqual($firstBreakpointAmount) &&
+            $amount->lessThanOrEqual($lastBreakpointAmount);
     }
 }

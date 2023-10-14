@@ -10,6 +10,8 @@ use Money\Money;
 use PragmaGoTech\Interview\Application\Factory\PLNMoneyFactory;
 use PragmaGoTech\Interview\Application\Service\Calculator\RoundedFixedFeeCalculator;
 use PragmaGoTech\Interview\Domain\Exception\InterviewException;
+use PragmaGoTech\Interview\Domain\Factory\MoneyFactory;
+use PragmaGoTech\Interview\Domain\Service\Calculator\FeeCalculator;
 use PragmaGoTech\Interview\Domain\ValueObject\LoanProposal;
 use PragmaGoTech\Interview\Domain\ValueObject\LoanTerm;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -28,8 +30,8 @@ final class CalculateCommand extends Command
      * @param RoundedFixedFeeCalculator $feeCalculator
      */
     public function __construct(
-        private readonly PLNMoneyFactory $moneyFactory,
-        private readonly RoundedFixedFeeCalculator $feeCalculator
+        private readonly MoneyFactory $moneyFactory,
+        private readonly FeeCalculator $feeCalculator
     ) {
         parent::__construct();
     }
@@ -59,7 +61,7 @@ final class CalculateCommand extends Command
             'Enter loan term',
             null,
             function (int $input) {
-                return LoanTerm::fromInt($input);
+                return LoanTerm::from($input);
             },
         );
     }
@@ -87,7 +89,7 @@ final class CalculateCommand extends Command
                 ->setHeaders(['Loan amount', 'Term', 'Fee'])
                 ->addRow([
                     $moneyFormatter->format($amount) . ' PLN',
-                    sprintf('%d months', $term->toInt()),
+                    sprintf('%d months', $term->toMonths()),
                     $moneyFormatter->format($fee) . ' PLN',
                 ])
                 ->render();

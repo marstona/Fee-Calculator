@@ -10,6 +10,8 @@ use PragmaGoTech\Interview\Domain\ValueObject\Breakpoint;
 class LinearInterpolation implements Interpolation
 {
     /**
+     * Interpolate the fee based on loan amount between two breakpoints.
+     *
      * @param  Money      $loanAmount
      * @param  Breakpoint $lowerBreakpoint
      * @param  Breakpoint $upperBreakpoint
@@ -17,20 +19,24 @@ class LinearInterpolation implements Interpolation
      */
     public function interpolate(Money $loanAmount, Breakpoint $lowerBreakpoint, Breakpoint $upperBreakpoint): Money
     {
-        // Calculate the differences
-        $amountDifference = $upperBreakpoint->getAmount()->subtract($lowerBreakpoint->getAmount());
-        $amountDifferenceInt = $amountDifference->getAmount() / 100;
+        // Extract the amounts and fees as integers
+        $loanAmountInt = $loanAmount->getAmount();
+        $lowerAmountInt = $lowerBreakpoint->getAmount()->getAmount();
+        $upperAmountInt = $upperBreakpoint->getAmount()->getAmount();
+        $lowerFeeInt = $lowerBreakpoint->getFee()->getAmount();
+        $upperFeeInt = $upperBreakpoint->getFee()->getAmount();
 
-        $feeDifference = $upperBreakpoint->getFee()->subtract($lowerBreakpoint->getFee());
-        $feeDifferenceInt = $feeDifference->getAmount() / 100;
+        // Calculate the differences
+        $amountDifference = $upperAmountInt - $lowerAmountInt;
+        $feeDifference = $upperFeeInt - $lowerFeeInt;
 
         // Calculate the proportion
-        $loanAmountDifference = $loanAmount->subtract($lowerBreakpoint->getAmount());
-        $proportion = $loanAmountDifference->divide($amountDifferenceInt);
+        $proportion = ($loanAmountInt - $lowerAmountInt) / $amountDifference;
 
         // Calculate the interpolated fee
-        $interpolatedFee = $proportion->multiply($feeDifferenceInt)->add($lowerBreakpoint->getFee());
+        $interpolatedFeeInt = (int) ceil($proportion * $feeDifference + $lowerFeeInt);
 
-        return $interpolatedFee;
+        // Create a Money object with the calculated fee
+        return Money::PLN($interpolatedFeeInt);
     }
 }

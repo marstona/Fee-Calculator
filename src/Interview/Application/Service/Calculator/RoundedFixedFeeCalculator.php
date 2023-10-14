@@ -9,7 +9,7 @@ use PragmaGoTech\Interview\Domain\Service\Calculator\FeeCalculator;
 use PragmaGoTech\Interview\Domain\Service\Round\Round;
 use PragmaGoTech\Interview\Domain\ValueObject\LoanProposal;
 
-readonly class RoundedFixedFeeCalculator implements FeeCalculator
+final readonly class RoundedFixedFeeCalculator implements FeeCalculator
 {
     /**
      * @param FixedFeeCalculator $feeCalculator
@@ -30,7 +30,7 @@ readonly class RoundedFixedFeeCalculator implements FeeCalculator
         $feeAmount = $this->feeCalculator->calculate($application);
         $loanAmount = $application->amount();
 
-        // Ensure that fee + loan amount is an exact multiple of 5
+        // Ensure that fee + loan amount is an exact multiple of 5 PLN
         $totalAmount = $loanAmount->add($feeAmount);
         $roundedTotalAmount = $this->round->round($totalAmount);
 

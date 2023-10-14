@@ -10,7 +10,7 @@ use PragmaGoTech\Interview\Domain\Service\Calculator\FeeCalculator;
 use PragmaGoTech\Interview\Domain\Service\Interpolation\Interpolation;
 use PragmaGoTech\Interview\Domain\ValueObject\LoanProposal;
 
-readonly class FixedFeeCalculator implements FeeCalculator
+final readonly class FixedFeeCalculator implements FeeCalculator
 {
     /**
      * @param BreakpointRepository $breakpointRepository

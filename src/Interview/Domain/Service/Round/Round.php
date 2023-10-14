@@ -9,8 +9,8 @@ use Money\Money;
 interface Round
 {
     /**
-     * @param  Money $value
+     * @param  Money $amount
      * @return Money
      */
-    public function round(Money $value): Money;
+    public function round(Money $amount): Money;
 }
